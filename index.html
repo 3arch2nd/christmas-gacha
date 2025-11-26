@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Holiday Gacha - Final Version</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Rochester&display=swap');
+
+        body {
+            font-family: 'Gowun Dodum', sans-serif;
+            background-color: #1e293b; 
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px),
+                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px),
+                radial-gradient(rgba(255,255,255,0.4), transparent 100%);
+            background-size: 550px 550px, 350px 350px, 250px 250px, 100% 100%;
+            background-position: 0 0, 40px 60px, 130px 270px, 0 0;
+            overflow-x: hidden;
+        }
+
+        .font-en { font-family: 'Rochester', cursive; }
+
+        .bottle-clip {
+             clip-path: polygon(
+                45% 0%, 55% 0%, 
+                55% 10%, 70% 25%, 60% 25%, 85% 55%, 75% 55%, 95% 90%, 85% 100%, 15% 100%, 5% 90%, 25% 55%, 15% 55%, 40% 25%, 30% 25%, 45% 10%
+            );
+        }
+        .glass-border {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.1));
+        }
+        .glass-body {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(236, 252, 203, 0.1) 0%, rgba(217, 249, 157, 0.3) 60%, rgba(190, 242, 100, 0.5) 100%);
+            backdrop-filter: blur(2px);
+            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.6), inset 10px 0 20px rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .shine-highlight {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 35% 25%, rgba(255,255,255,0.7) 0%, transparent 15%), linear-gradient(110deg, transparent 35%, rgba(255,255,255,0.2) 40%, transparent 45%);
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .bottle-lid {
+            position: absolute;
+            top: 0px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 36px; 
+            height: 25px;
+            background: linear-gradient(90deg, #b45309, #facc15, #fef08a, #facc15, #b45309);
+            border-radius: 4px 4px 0 0;
+            z-index: 25;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            border: 1px solid #78350f;
+        }
+        
+        .gold-foil-neck {
+            position: absolute;
+            top: 25px; 
+            left: 50%;
+            transform: translateX(-50%);
+            width: 34px;  
+            height: 30px; 
+            background: repeating-linear-gradient(
+                90deg,
+                #d97706,
+                #d97706 2px,
+                #f59e0b 2px,
+                #f59e0b 4px
+            );
+            border-radius: 0 0 2px 2px;
+            z-index: 24;
+            opacity: 0.95;
+            box-shadow: inset 0 2px 3px rgba(0,0,0,0.2);
+        }
+
+        @keyframes shake { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-2deg); } 75% { transform: rotate(2deg); } }
+        .group-shake { animation: shake 0.1s ease-in-out infinite; } 
+        
+        @keyframes spinLever { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .lever-spin { animation: spinLever 1s ease-in-out; }
+        
+        @keyframes drop { 0% { top: 75%; opacity: 0; transform: scale(0.5) rotate(0deg); } 100% { top: 95%; opacity: 1; transform: scale(1) rotate(720deg); } }
+        .capsule-drop { animation: drop 0.8s cubic-bezier(0.3, 1.5, 0.5, 1) forwards; }
+        
+        @keyframes pop { 0% { transform: scale(0); } 80% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        .modal-pop { animation: pop 0.4s ease-out forwards; }
+
+        .smooth-move { transition: transform 0.1s linear; }
+
+        @keyframes openTop { 
+            0% { transform: translateY(0) rotate(0); }
+            100% { transform: translateY(-50px) rotate(-20deg); opacity: 1; }
+        }
+        @keyframes openBottom { 
+            0% { transform: translateY(0) rotate(0); }
+            100% { transform: translateY(30px) rotate(10deg); opacity: 1; }
+        }
+        @keyframes jumpAndReveal {
+            0% { transform: translateY(30px) scale(0.3); opacity: 1; z-index: 10; }
+            40% { z-index: 10; }
+            50% { transform: translateY(-40px) scale(1.4); opacity: 1; z-index: 30; }
+            100% { transform: translateY(-10px) scale(1.1); opacity: 1; z-index: 30; }
+        }
+        .animate-open-top { animation: openTop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards; }
+        .animate-open-bottom { animation: openBottom 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards; }
+        .animate-jump-num { animation: jumpAndReveal 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.4s forwards; will-change: transform, z-index; }
+
+        .lever-base { width: 70px; height: 70px; background: radial-gradient(#a16207, #713f12); border-radius: 50%; border: 3px solid #451a03; box-shadow: inset 0 2px 5px rgba(255,255,255,0.2), 0 5px 10px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; }
+        .lever-base:active { transform: scale(0.95); }
+        .lever-handle { width: 90px; height: 14px; background: #b45309; border-radius: 8px; position: absolute; box-shadow: 0 2px 4px rgba(0,0,0,0.5); border: 1px solid #78350f; }
+        .lever-center { width: 16px; height: 16px; background: #fbbf24; border-radius: 50%; z-index: 10; box-shadow: inset 1px 1px 2px rgba(255,255,255,0.8); }
+
+        .real-capsule { width: 36px; height: 36px; border-radius: 50%; position: absolute; overflow: hidden; box-shadow: inset 0 0 5px rgba(255,255,255,0.5), 0 2px 4px rgba(0,0,0,0.3); will-change: transform; }
+        .capsule-top { position: absolute; top: 0; left: 0; width: 100%; height: 50%; border-radius: 36px 36px 0 0; background: linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(255,255,255,0.5)); border-bottom: 1px solid rgba(0,0,0,0.05); z-index: 20; }
+        .capsule-bottom { position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; border-radius: 0 0 36px 36px; z-index: 20; }
+
+        .cap-red { background: rgba(252, 165, 165, 1); }
+        .cap-gold { background: rgba(253, 224, 71, 1); }
+        .cap-green { background: rgba(134, 239, 172, 1); }
+        .cap-blue { background: rgba(147, 197, 253, 1); }
+        .cap-purple { background: rgba(216, 180, 254, 1); }
+
+        .text-outline-lg { color: black; -webkit-text-stroke: 3px white; text-shadow: 4px 4px 0px rgba(255,255,255,0.5); paint-order: stroke fill; }
+        
+        .btn-secondary { background-color: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.8); backdrop-filter: blur(4px); border: 1px solid rgba(255, 255, 255, 0.2); transition: all 0.2s; font-size: 0.875rem; font-weight: 500; padding: 0.5rem 1.5rem; border-radius: 9999px; }
+        .btn-secondary:hover { background-color: rgba(255, 255, 255, 0.2); color: white; }
+
+        .custom-input { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.3); color: #fff; text-align: center; border-radius: 8px; padding: 4px; width: 70px; outline: none; transition: 0.2s; font-weight: bold; }
+        .custom-input:focus { background: rgba(0,0,0,0.5); border-color: #fbbf24; }
+        .custom-input::placeholder { color: rgba(255,255,255,0.5); font-weight: normal; font-size: 12px;}
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <svg width="0" height="0" class="absolute">
+        <linearGradient id="star-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#fef08a;stop-opacity:1" />
+            <stop offset="50%" style="stop-color:#eab308;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#a16207;stop-opacity:1" />
+        </linearGradient>
+    </svg>
+
+    <div class="w-full max-w-lg flex flex-col items-center relative">
+        <div class="mb-2 text-center z-10 w-full">
+            <h1 class="text-4xl text-white font-bold drop-shadow-md tracking-wider font-en">🎄Merry Gacha</h1>
+            
+            <div class="bg-slate-900/60 backdrop-blur px-4 py-3 rounded-xl mt-3 inline-flex items-center gap-4 border border-slate-700 shadow-lg justify-center flex-wrap">
+                <div class="flex flex-col items-center">
+                    <label for="total-input" class="text-[10px] text-slate-400 font-bold uppercase mb-1">전체</label>
+                    <input type="number" id="total-input" class="custom-input text-lg" placeholder="입력" min="1" onchange="updateRemainingDisplay()">
+                </div>
+                <div class="h-8 w-px bg-slate-600 mx-1"></div>
+                <div class="flex flex-col items-center">
+                    <label for="batch-input" class="text-[10px] text-yellow-500 font-bold uppercase mb-1">뽑을 인원</label>
+                    <input type="number" id="batch-input" class="custom-input text-lg border-yellow-600/50" placeholder="1" min="1" value="1">
+                </div>
+                <div class="h-8 w-px bg-slate-600 mx-1"></div>
+                <div class="flex flex-col items-center min-w-[60px]">
+                    <label class="text-[10px] text-slate-400 font-bold uppercase mb-1">남은 인원</label>
+                    <span id="remaining-count" class="text-green-400 font-bold text-xl">--</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="machine-container" class="relative flex flex-col items-center mt-12">
+            
+            <div id="shaking-group" class="relative flex flex-col items-center z-10 origin-bottom">
+                
+                <div class="z-30 absolute -top-5 drop-shadow-lg">
+                    <svg width="40" height="40" viewBox="0 0 24 24" class="metal-star">
+                        <path fill="url(#star-gradient)" stroke="#b45309" stroke-width="0.5" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                    </svg>
+                </div>
+
+                <div class="bottle-lid"></div>
+                <div class="gold-foil-neck"></div>
+
+                <div class="w-72 h-96 glass-border bottle-clip relative filter drop-shadow-xl mt-1">
+                    <div class="glass-body bottle-clip relative">
+                        <div class="shine-highlight"></div>
+                        <div class="absolute top-[35%] left-1/2 -translate-x-1/2 text-center opacity-60 z-0 pointer-events-none">
+                            <div class="text-green-900 font-bold text-2xl border-y border-green-800/30 py-1 font-en">Holiday</div>
+                        </div>
+                        <div id="capsule-container" class="w-full h-full relative z-10"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-48 h-32 bg-[#78350f] rounded-xl border-t-4 border-[#451a03] relative flex flex-col items-center justify-end pb-6 shadow-2xl z-20 -mt-10">
+                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] pointer-events-none rounded-xl"></div>
+                <div class="absolute top-4 w-32 h-8 bg-gradient-to-r from-yellow-700 via-yellow-500 to-yellow-700 rounded flex items-center justify-center shadow-md border border-yellow-800 z-30">
+                    <span class="text-[#451a03] text-lg font-kr" style="text-shadow: 0 1px 0 rgba(255,255,255,0.4);">&#8631;</span>
+                </div>
+                <div id="drop-zone" class="absolute inset-0 overflow-visible pointer-events-none z-50"></div>
+                <div class="relative z-30 group -mb-8">
+                    <div id="lever" onclick="startGacha()" class="lever-base transition-transform group-hover:scale-105 active:scale-95">
+                        <div class="lever-handle"></div>
+                        <div class="lever-center"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="w-60 h-4 bg-black/40 rounded-full blur-md mt-6"></div>
+        </div>
+
+        <div class="mt-12 flex gap-3 z-10">
+            <button onclick="resetData()" class="btn-secondary">초기화</button>
+            <button onclick="toggleHistory()" class="btn-secondary">기록</button>
+        </div>
+
+        <div id="history-panel" class="hidden absolute top-20 bg-slate-800/95 backdrop-blur rounded-xl p-4 shadow-2xl border border-slate-600 z-50 w-64 max-h-96 overflow-y-auto">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-600 pb-2">
+                <h3 class="text-xl font-bold text-green-400 font-en">Collection</h3>
+                <button onclick="toggleHistory()" class="text-gray-400 hover:text-white">✕</button>
+            </div>
+            <div id="history-list" class="flex flex-wrap gap-2"></div>
+        </div>
+    </div>
+
+    <div id="result-modal" class="fixed inset-0 bg-black/90 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-md">
+        <div class="bg-gradient-to-br from-red-800 to-red-900 p-2 rounded-[2rem] modal-pop w-full max-w-4xl shadow-2xl border-4 border-[#b45309]">
+            <div class="relative bg-[#fffbeb] rounded-[1.8rem] p-6 text-center overflow-hidden min-h-[400px] flex flex-col justify-center">
+                <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#b45309_1px,transparent_1px)] bg-[length:15px_15px]"></div>
+                
+                <div class="relative z-10 flex flex-col h-full">
+                    <h2 class="text-5xl md:text-6xl font-bold text-red-800 mb-8 drop-shadow-sm font-en">Congratulations!</h2>
+                    <div id="result-capsule-area" class="flex-1 flex flex-wrap items-center justify-center gap-8 mb-8"></div>
+                    <button onclick="closeModal()" class="w-auto px-10 mx-auto bg-[#84b76d] hover:brightness-110 text-white py-3 rounded-2xl font-bold text-2xl shadow-lg transition border-b-8 border-[#658c52] active:border-b-0 active:translate-y-2">
+                        확인
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function(_0x3fdcbc,_0xa2bb4b){const _0x1c7998=_0x597f,_0x53a136=_0x3fdcbc();while(!![]){try{const _0x5412e1=-parseInt(_0x1c7998(0x12e))/0x1*(parseInt(_0x1c7998(0x168))/0x2)+-parseInt(_0x1c7998(0x13f))/0x3+-parseInt(_0x1c7998(0x156))/0x4+-parseInt(_0x1c7998(0x166))/0x5*(-parseInt(_0x1c7998(0x142))/0x6)+parseInt(_0x1c7998(0x141))/0x7+-parseInt(_0x1c7998(0x159))/0x8+parseInt(_0x1c7998(0x148))/0x9*(parseInt(_0x1c7998(0x15c))/0xa);if(_0x5412e1===_0xa2bb4b)break;else _0x53a136['push'](_0x53a136['shift']());}catch(_0x295313){_0x53a136['push'](_0x53a136['shift']());}}}(_0x5596,0x5b8f0));function _0x597f(_0x23fabd,_0x32690a){const _0x559689=_0x5596();return _0x597f=function(_0x597f2b,_0x556e62){_0x597f2b=_0x597f2b-0x11e;let _0x650514=_0x559689[_0x597f2b];return _0x650514;},_0x597f(_0x23fabd,_0x32690a);}let drawnNumbers=[],isSpinning=![],chaosInterval;function init(){const _0x52f26c=_0x597f,_0x31ae3b=JSON[_0x52f26c(0x131)](localStorage[_0x52f26c(0x164)](_0x52f26c(0x11e))||'[]'),_0x5b4bf3=localStorage[_0x52f26c(0x164)](_0x52f26c(0x152)),_0x14f8c1=localStorage[_0x52f26c(0x164)](_0x52f26c(0x16a));drawnNumbers=_0x31ae3b;_0x5b4bf3&&(document[_0x52f26c(0x138)](_0x52f26c(0x154))[_0x52f26c(0x121)]=_0x5b4bf3);if(_0x14f8c1)document['getElementById'](_0x52f26c(0x12f))[_0x52f26c(0x121)]=_0x14f8c1;updateRemainingDisplay(),createInitialCapsules();}function getAvailableNumbers(){const _0x10e8d8=_0x597f,_0x506abf=document[_0x10e8d8(0x138)]('total-input')['value'];if(_0x506abf===''||parseInt(_0x506abf)<0x1)return null;const _0x1c2e4b=parseInt(_0x506abf),_0x9ad563=Array[_0x10e8d8(0x139)]({'length':_0x1c2e4b},(_0xa38d31,_0x50fb9f)=>_0x50fb9f+0x1);return _0x9ad563[_0x10e8d8(0x12b)](_0x545905=>!drawnNumbers['includes'](_0x545905));}function updateRemainingDisplay(){const _0x13d329=_0x597f,_0x121caa=getAvailableNumbers(),_0x59927a=document[_0x13d329(0x138)](_0x13d329(0x160));_0x121caa===null?_0x59927a[_0x13d329(0x13e)]='--':(_0x59927a[_0x13d329(0x13e)]=_0x121caa[_0x13d329(0x162)],localStorage[_0x13d329(0x133)](_0x13d329(0x152),document[_0x13d329(0x138)](_0x13d329(0x154))['value'])),updateHistoryUI();}function createInitialCapsules(){const _0x565b2b=_0x597f,_0x2b8870=document[_0x565b2b(0x138)](_0x565b2b(0x12c));_0x2b8870[_0x565b2b(0x127)]='';const _0x17c598=['cap-red',_0x565b2b(0x147),_0x565b2b(0x13a),_0x565b2b(0x132),'cap-purple'];for(let _0x3f4c16=0x0;_0x3f4c16<0xc;_0x3f4c16++){const _0x4b98a7=document[_0x565b2b(0x150)](_0x565b2b(0x157));_0x4b98a7[_0x565b2b(0x145)]=_0x565b2b(0x134);const _0x546f11=_0x17c598[_0x3f4c16%_0x17c598['length']],_0x379934=Math[_0x565b2b(0x151)]()*0x50+0x5,_0x54a42c=Math[_0x565b2b(0x151)]()*0x14,_0x4abb05=Math[_0x565b2b(0x151)]()*0x168;_0x4b98a7[_0x565b2b(0x129)][_0x565b2b(0x13d)]=_0x379934+'%',_0x4b98a7['style']['bottom']=_0x54a42c+'%',_0x4b98a7['style'][_0x565b2b(0x153)]=_0x565b2b(0x12d)+_0x4abb05+_0x565b2b(0x135),_0x4b98a7['innerHTML']='<div\x20class=\x22capsule-top\x22></div><div\x20class=\x22capsule-bottom\x20'+_0x546f11+_0x565b2b(0x12a),_0x2b8870[_0x565b2b(0x15d)](_0x4b98a7);}}function startGacha(){const _0x6884c7=_0x597f;if(isSpinning)return;const _0x52a74d=document[_0x6884c7(0x138)]('total-input'),_0x1a4ff2=getAvailableNumbers();if(_0x1a4ff2===null){alert(_0x6884c7(0x14e)),_0x52a74d[_0x6884c7(0x14f)]();return;}if(_0x1a4ff2[_0x6884c7(0x162)]===0x0){alert(_0x6884c7(0x122));return;}let _0x5badc4=parseInt(document[_0x6884c7(0x138)](_0x6884c7(0x12f))[_0x6884c7(0x121)])||0x1;if(_0x5badc4<0x1)_0x5badc4=0x1;localStorage[_0x6884c7(0x133)](_0x6884c7(0x16a),_0x5badc4),isSpinning=!![];const _0x439950=document[_0x6884c7(0x138)](_0x6884c7(0x140)),_0x2cccce=document['getElementById'](_0x6884c7(0x15b)),_0x175a8b=document[_0x6884c7(0x128)]('.inner-capsule');_0x439950[_0x6884c7(0x136)]['add'](_0x6884c7(0x144)),setTimeout(()=>{const _0x9e064d=_0x6884c7;_0x2cccce[_0x9e064d(0x136)][_0x9e064d(0x146)]('group-shake'),chaosInterval=setInterval(()=>{_0x175a8b['forEach'](_0x5ae241=>{const _0x49fb3c=_0x597f,_0x254784=(Math[_0x49fb3c(0x151)]()-0.5)*0xc8,_0xc3f76e=Math['random']()*0x96+0x14,_0x20fd6a=Math['random']()*0x2d0-0x168;_0x5ae241[_0x49fb3c(0x129)]['transform']='translate('+_0x254784+_0x49fb3c(0x125)+_0xc3f76e+'px)\x20rotate('+_0x20fd6a+'deg)';});},0x64);},0xc8),setTimeout(()=>{const _0x41b3bb=_0x6884c7;clearInterval(chaosInterval),_0x439950[_0x41b3bb(0x136)][_0x41b3bb(0x126)](_0x41b3bb(0x144)),_0x2cccce['classList'][_0x41b3bb(0x126)](_0x41b3bb(0x163)),_0x175a8b[_0x41b3bb(0x124)](_0x590929=>{const _0x35a8bb=_0x41b3bb,_0x35bc1e=_0x590929[_0x35a8bb(0x129)]['transform']['match'](/rotate\([^)]+\)/);_0x590929['style'][_0x35a8bb(0x153)]=_0x35bc1e?_0x35bc1e[0x0]:_0x35a8bb(0x161);});const _0x2bb310=Math[_0x41b3bb(0x15e)](_0x5badc4,_0x1a4ff2[_0x41b3bb(0x162)]);setTimeout(()=>processBatchDraw(_0x1a4ff2,_0x2bb310),0x12c);},0x708);}function processBatchDraw(_0x557b77,_0x53dc31){const _0x4cdc70=_0x597f,_0x9b9389=[];let _0x297e05=[..._0x557b77];for(let _0xdf26f=0x0;_0xdf26f<_0x53dc31;_0xdf26f++){const _0xef9364=Math['floor'](Math[_0x4cdc70(0x151)]()*_0x297e05['length']),_0x1e307a=_0x297e05[_0xef9364];_0x9b9389[_0x4cdc70(0x14a)](_0x1e307a),_0x297e05['splice'](_0xef9364,0x1);}drawnNumbers=[...drawnNumbers,..._0x9b9389],localStorage['setItem'](_0x4cdc70(0x11e),JSON['stringify'](drawnNumbers)),visualDrop(_0x9b9389);}function visualDrop(_0x33c849){const _0x1ceced=_0x597f,_0x3d1ef2=document['getElementById'](_0x1ceced(0x15f)),_0x203bb2=document[_0x1ceced(0x150)]('div'),_0x337f6a=['cap-red','cap-gold','cap-green',_0x1ceced(0x132),_0x1ceced(0x15a)],_0x243ff8=_0x337f6a[Math[_0x1ceced(0x13c)](Math['random']()*_0x337f6a[_0x1ceced(0x162)])];_0x203bb2[_0x1ceced(0x145)]='absolute\x20left-1/2\x20-translate-x-1/2\x20w-14\x20h-14\x20rounded-full\x20capsule-drop\x20z-50\x20flex\x20items-center\x20justify-center\x20shadow-lg\x20overflow-hidden\x20real-capsule\x20border-none',_0x203bb2['innerHTML']=_0x1ceced(0x130)+_0x243ff8+_0x1ceced(0x14d),_0x3d1ef2[_0x1ceced(0x15d)](_0x203bb2),setTimeout(()=>{const _0x1dcd1e=_0x1ceced;_0x203bb2[_0x1dcd1e(0x126)](),showBatchResult(_0x33c849),updateRemainingDisplay(),createInitialCapsules(),isSpinning=![];},0x320);}function showBatchResult(_0x2e86ae){const _0x210235=_0x597f,_0x2123bb=document[_0x210235(0x138)](_0x210235(0x137)),_0x300b1c=document[_0x210235(0x138)]('result-capsule-area');_0x300b1c[_0x210235(0x127)]='';const _0x4e74df=['cap-red','cap-gold',_0x210235(0x13a),_0x210235(0x132),_0x210235(0x15a)];_0x2e86ae[_0x210235(0x124)]((_0x478ea2,_0x2789ac)=>{const _0x1b7bbb=_0x210235,_0x22806a=_0x4e74df[(_0x478ea2+_0x2789ac)%_0x4e74df[_0x1b7bbb(0x162)]],_0x2fdbf5=_0x2e86ae['length']===0x1?_0x1b7bbb(0x14b):_0x1b7bbb(0x169),_0x41628d=_0x2e86ae[_0x1b7bbb(0x162)]===0x1?'text-[6rem]':_0x1b7bbb(0x149),_0x1dda74=document[_0x1b7bbb(0x150)](_0x1b7bbb(0x157));_0x1dda74[_0x1b7bbb(0x145)]=_0x1b7bbb(0x167)+_0x2fdbf5,_0x1dda74[_0x1b7bbb(0x127)]=_0x1b7bbb(0x155)+_0x41628d+'\x20font-black\x20text-outline-lg\x20absolute\x20animate-jump-num\x20origin-bottom\x22\x20style=\x22font-family:\x20\x27Gowun\x20Dodum\x27,\x20sans-serif;\x20will-change:\x20transform,\x20z-index;\x22>'+_0x478ea2+'</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22absolute\x20inset-0\x20z-20\x20pointer-events-none\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22absolute\x20top-0\x20w-full\x20h-1/2\x20rounded-t-full\x20bg-gradient-to-b\x20from-white/90\x20to-white/50\x20border-b\x20border-black/10\x20animate-open-top\x20origin-bottom\x20shadow-xl\x22></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22absolute\x20bottom-0\x20w-full\x20h-1/2\x20rounded-b-full\x20'+_0x22806a+_0x1b7bbb(0x14c),_0x300b1c[_0x1b7bbb(0x15d)](_0x1dda74);}),_0x2123bb[_0x210235(0x136)]['remove'](_0x210235(0x143));}function closeModal(){const _0x4d2bd4=_0x597f;document[_0x4d2bd4(0x138)]('result-modal')[_0x4d2bd4(0x136)][_0x4d2bd4(0x146)](_0x4d2bd4(0x143));}function _0x5596(){const _0x160df0=['w-40\x20h-40','\x20animate-open-bottom\x20origin-top\x20shadow-xl\x22></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','\x22></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22text-white\x20font-black\x20text-2xl\x20relative\x20z-50\x20drop-shadow-md\x20font-en\x22>?</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','❗\x20전체\x20인원\x20수를\x20먼저\x20입력해주세요','focus','createElement','random','gacha_total_v7','transform','total-input','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22','2089684IIWgjj','div','history-panel','2450168MrvjpY','cap-purple','shaking-group','1250lunoSw','appendChild','min','drop-zone','remaining-count','rotate(0deg)','length','group-shake','getItem','removeItem','105qvMFOo','relative\x20flex\x20items-center\x20justify-center\x20shrink-0\x20','670fxdStX','w-24\x20h-24','gacha_batch_v7','gacha_drawn_v7','모든\x20기록을\x20초기화하시겠습니까?','history-list','value','🎉\x20모든\x20인원을\x20뽑았습니다','w-8\x20h-8\x20flex\x20items-center\x20justify-center\x20bg-gray-700\x20text-white\x20rounded-full\x20font-bold\x20border\x20border-gray-600\x20text-xs','forEach','px,\x20-','remove','innerHTML','querySelectorAll','style','\x22></div>','filter','capsule-container','rotate(','418bBZtEf','batch-input','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22capsule-top\x22></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22capsule-bottom\x20','parse','cap-blue','setItem','real-capsule\x20inner-capsule\x20smooth-move','deg)','classList','result-modal','getElementById','from','cap-green','초기화되었습니다.','floor','left','textContent','465864DHnKFD','lever','4904340xdahNT','137154PsKAXW','hidden','lever-spin','className','add','cap-gold','22923xMnzQc','text-5xl','push'];_0x5596=function(){return _0x160df0;};return _0x5596();}function toggleHistory(){const _0x2db653=_0x597f;document[_0x2db653(0x138)](_0x2db653(0x158))[_0x2db653(0x136)]['toggle'](_0x2db653(0x143));}function updateHistoryUI(){const _0x5808bf=_0x597f,_0x3e9a68=document[_0x5808bf(0x138)](_0x5808bf(0x120));_0x3e9a68[_0x5808bf(0x127)]='',drawnNumbers['forEach'](_0x37aafb=>{const _0x17f942=_0x5808bf,_0x3f46fb=document['createElement'](_0x17f942(0x157));_0x3f46fb[_0x17f942(0x145)]=_0x17f942(0x123),_0x3f46fb[_0x17f942(0x13e)]=_0x37aafb,_0x3e9a68[_0x17f942(0x15d)](_0x3f46fb);});}function resetData(){const _0x19e613=_0x597f;if(!confirm(_0x19e613(0x11f)))return;drawnNumbers=[],localStorage[_0x19e613(0x165)]('gacha_drawn_v7'),updateRemainingDisplay(),createInitialCapsules(),alert(_0x19e613(0x13b));}init();
+    </script>
+</body>
+</html>
